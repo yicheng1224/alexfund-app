@@ -46,9 +46,9 @@ const Step8_Review = () => {
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
 
-      const result = await contractService.createFund(signer, formData);
-
-      alert(`Fund created successfully!\nComptroller: ${result.comptrollerProxy}\nVault: ${result.vaultProxy}`);
+      // const result = await contractService.createFund(signer, formData);
+      // alert(`Fund created successfully!\nComptroller: ${result.comptrollerProxy}\nVault: ${result.vaultProxy}`);
+      alert("This functionality is currently disabled.");
 
     } catch (err) {
       console.error("Fund creation failed:", err);
@@ -125,8 +125,8 @@ const Step8_Review = () => {
 
         <div className="mt-8 pt-8 border-t border-gray-700 flex justify-between items-center">
             <button onClick={prevStep} className="text-gray-300 hover:text-white font-medium py-3 px-8 rounded-lg transition-colors border border-gray-600">Back</button>
-            <button onClick={handleCreateVault} disabled={!termsAccepted || isCreating} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg shadow-indigo-500/30 disabled:bg-gray-600 disabled:cursor-not-allowed">
-                {isCreating ? 'Creating...' : 'Create'}
+            <button onClick={handleCreateVault} disabled={true} className="bg-gray-600 text-white font-medium py-3 px-8 rounded-lg transition-colors cursor-not-allowed">
+                Creation Disabled
             </button>
         </div>
     </div>
