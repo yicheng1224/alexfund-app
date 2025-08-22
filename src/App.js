@@ -1,4 +1,5 @@
 import React, { useState, useContext, createContext, useEffect, useRef } from 'react';
+import { ethers } from 'ethers';
 
 // =======================================================================
 // 0. 圖示元件 (SVG Icons)
@@ -779,18 +780,43 @@ const Step7_AssetManagement = () => {
 const Step8_Review = () => {
   const { formData, prevStep } = useCreation();
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState('');
+
   const { basics, fees, deposits, sharesTransferability, redemptions } = formData;
 
   const handleCreateVault = async () => {
-    if (!termsAccepted) return;
-    console.log("準備發送到智能合約的最終資料:", formData);
+    if (!termsAccepted || isCreating) return;
+
+    setIsCreating(true);
+    setError('');
     
     try {
-        const result = await contractService.createFund(formData);
-        alert(`基金創建成功！\nComptroller: ${result.comptrollerProxy}\nVault: ${result.vaultProxy}`);
-    } catch (error) {
-        console.error("基金創建失敗:", error);
-        alert(`基金創建失敗: ${error.message}`);
+      if (!window.ethereum) {
+        throw new Error("Please install MetaMask or another Ethereum wallet.");
+      }
+
+      // 步驟四：將 UI 與合約服務連接
+      // 1. 獲取簽名者 (Signer)
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // It's good practice to request accounts again here to ensure connection.
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+
+      // 2. 呼叫服務
+      const result = await contractService.createFund(signer, formData);
+
+      // 4. 顯示結果
+      alert(`Fund created successfully!\nComptroller: ${result.comptrollerProxy}\nVault: ${result.vaultProxy}`);
+
+    } catch (err) {
+      console.error("Fund creation failed:", err);
+      const errorMessage = err.message || "An unknown error occurred.";
+      setError(errorMessage);
+      alert(`Fund creation failed: ${errorMessage}`);
+    } finally {
+      // 3. 處理 UI 狀態
+      setIsCreating(false);
     }
   };
   
@@ -844,7 +870,7 @@ const Step8_Review = () => {
              <div>
                 <h2 className="text-xl font-semibold mb-4">Other Settings</h2>
                 <div className="bg-gray-800/60 rounded-lg px-6">
-                    <SummaryItem label="Shares Action Timelock" value={redemptions.lockUpPeriod} />
+                    <SummaryItem label="Shares Action Timelock" value={`${redemptions.lockUpPeriod} hours`} />
                 </div>
             </div>
         </div>
@@ -854,12 +880,13 @@ const Step8_Review = () => {
                 <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="form-checkbox h-5 w-5 bg-gray-700 border-gray-500 text-indigo-600 rounded focus:ring-indigo-500"/>
                 <span className="text-gray-300">I have read & agree to the <a href="#" className="text-indigo-400 hover:underline">Terms & Conditions</a>.</span>
             </label>
+            {error && <p className="mt-2 text-sm text-red-400">Error: {error}</p>}
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-700 flex justify-between items-center">
             <button onClick={prevStep} className="text-gray-300 hover:text-white font-medium py-3 px-8 rounded-lg transition-colors border border-gray-600">Back</button>
-            <button onClick={handleCreateVault} disabled={!termsAccepted} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg shadow-indigo-500/30 disabled:bg-gray-600 disabled:cursor-not-allowed">
-                Create
+            <button onClick={handleCreateVault} disabled={!termsAccepted || isCreating} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-lg shadow-indigo-500/30 disabled:bg-gray-600 disabled:cursor-not-allowed">
+                {isCreating ? 'Creating...' : 'Create'}
             </button>
         </div>
     </div>
@@ -1039,27 +1066,9 @@ const RoleSelectionPage = ({ onSelectRole }) => {
 
 
 // =======================================================================
-// 6. 智能合約互動服務 (Contract Service - Mock)
+// 6. 智能合約互動服務 (Contract Service)
 // =======================================================================
-
-const contractService = {
-  createFund: async (formData) => {
-    console.log("正在呼叫 contractService.createFund，參數為:", formData);
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const result = {
-        comptrollerProxy: '0x' + [...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''),
-        vaultProxy: '0x' + [...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
-    };
-
-    if (Math.random() < 0.1) {
-        throw new Error("使用者拒絕了交易。");
-    }
-
-    return result;
-  }
-};
+import { contractService } from './services/contractService.js';
 
 
 // =======================================================================
