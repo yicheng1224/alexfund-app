@@ -10,7 +10,7 @@ import ChevronDownIcon from '../icons/ChevronDownIcon';
 
 const TopHeader = () => {
     const { network, setNetwork, currency, setCurrency, walletAddress } = useApp();
-    const networks = { Ethereum: <EthereumIcon />, Arbitrum: <ArbitrumIcon />, Base: <BaseIcon />, Polygon: <PolygonIcon /> };
+    const networks = { Ethereum: <EthereumIcon />, Sepolia: <EthereumIcon />, Arbitrum: <ArbitrumIcon />, Base: <BaseIcon />, Polygon: <PolygonIcon /> };
     const currencies = ['ETH', 'BTC', 'USD', 'EUR', 'CHF', 'GBP', 'AUD', 'JPY'];
 
     const Dropdown = ({ options, selected, setSelected, renderOption }) => {

@@ -22,9 +22,29 @@ const Step8_Review = () => {
         throw new Error("Please install MetaMask or another Ethereum wallet.");
       }
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+
+      // Check and switch network if necessary
+      const sepoliaChainId = 11155111n; // Sepolia's Chain ID as a BigInt
+      const network = await provider.getNetwork();
+
+      if (network.chainId !== sepoliaChainId) {
+        try {
+          await provider.send('wallet_switchEthereumChain', [{ chainId: '0x' + sepoliaChainId.toString(16) }]);
+        } catch (switchError) {
+          // This error code indicates that the chain has not been added to MetaMask.
+          // In a real-world app, you might want to handle this by adding the network configuration.
+          // For now, we'll just throw a more specific error.
+          if (switchError.code === 4902) {
+            throw new Error('This app requires the Sepolia network. Please add it to your MetaMask and try again.');
+          }
+          throw switchError;
+        }
+      }
+
+      // Re-get signer to be safe, as the network might have changed
       await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
 
       const result = await contractService.createFund(signer, formData);
 

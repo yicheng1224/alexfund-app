@@ -3,7 +3,7 @@ import React, { useState, createContext, useContext } from 'react';
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    const [network, setNetwork] = useState('Ethereum');
+    const [network, setNetwork] = useState('Sepolia');
     const [currency, setCurrency] = useState('USD');
     const [walletAddress, setWalletAddress] = useState(null);
     const [userFunds, setUserFunds] = useState([]);
