@@ -61,10 +61,13 @@ const createFund = async (signer, formData) => {
   const fundDeployer = new ethers.Contract(fundDeployerAddress, fundDeployerAbi, signer);
   const fundOwner = await signer.getAddress();
 
-  // 1. 參數轉換
-  const denominationAssetAddress = DENOMINATION_ASSETS[formData.basics.denominationAsset];
+  // 1. 參數轉換 (DEBUGGING STEP: Forcing WETH)
+  console.log("DEBUG: Forcing denomination asset to WETH for testing.");
+  const denominationAssetAddress = DENOMINATION_ASSETS['WETH'];
+  // const denominationAssetAddress = DENOMINATION_ASSETS[formData.basics.denominationAsset];
   if (!denominationAssetAddress) {
-    throw new Error(`Unsupported denomination asset: ${formData.basics.denominationAsset}`);
+    // This part should not be reached during debugging
+    throw new Error(`Unsupported denomination asset: WETH`);
   }
 
   // The contract expects the timelock in seconds, but the UI provides it in hours.
