@@ -68,10 +68,7 @@ const createFund = async (signer, formData) => {
   }
 
   // The contract expects the timelock in seconds, but the UI provides it in hours.
-  // DEBUGGING STEP: Forcing a non-zero timelock to test hypothesis.
-  console.log("DEBUG: Forcing sharesActionTimelock to 3600 for testing.");
-  const sharesActionTimelockInSeconds = 3600;
-  // const sharesActionTimelockInSeconds = parseFloat(formData.redemptions.lockUpPeriod) * 3600;
+  const sharesActionTimelockInSeconds = parseFloat(formData.redemptions.lockUpPeriod) * 3600;
 
   // 2. 建構交易參數
   const comptrollerConfig = {
